@@ -24,5 +24,5 @@ COPY . .
 # Expose app port
 EXPOSE 8000
 
-# Run app
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run app with explicit logging for Dokploy
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "info", "--access-log"]
