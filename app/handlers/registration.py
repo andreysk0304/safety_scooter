@@ -34,7 +34,7 @@ async def check_validation(data: Registration) -> dict | None:
 
 
 
-@router.post("/")
+@router.post("/registration")
 async def registration_func(data: Registration, request: Request):
 
     async with session_maker() as session:
