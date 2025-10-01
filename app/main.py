@@ -12,7 +12,7 @@ from app.handlers import registration
 app = FastAPI(openapi_tags=openapi_tags)
 
 
-app.include_router(registration.router)
+app.include_router(registration.router, prefix="")
 
 
 

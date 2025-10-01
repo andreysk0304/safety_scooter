@@ -11,7 +11,7 @@ from app.handlers.models.registration_model import Registration
 from sqlalchemy import text
 
 
-router = APIRouter(prefix="/", tags=["Authorization"])
+router = APIRouter(tags=["Authorization"])
 
 
 async def check_validation(data: Registration) -> dict | None:
