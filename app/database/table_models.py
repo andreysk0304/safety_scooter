@@ -19,7 +19,7 @@ class Users(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     phone_number: Mapped[str] = mapped_column(String(16))
     password: Mapped[str] = mapped_column(String(255))
-    created_at: Mapped[datetime] = Mapped(DateTime())
+    created_at: Mapped[datetime] = mapped_column(DateTime())
 
 
 async def create_db():
