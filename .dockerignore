@@ -1,0 +1,31 @@
+# VCS
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Envs
+.venv
+venv
+env
+
+# Editors/IDE
+.idea
+.vscode
+
+# Caches & logs
+.pytest_cache
+.mypy_cache
+.cache
+*.log
+
+# Builds
+build
+site
+htmlcov
+dist
