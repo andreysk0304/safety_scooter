@@ -50,7 +50,7 @@ async def registration_func(data: Registration, request: Request):
 
 
         user = await session.execute(
-            text('''SELECT id FROM users WHERE phone = :phone'''),
+            text('''SELECT id FROM users WHERE phone_number = :phone'''),
             {'phone': data.phone_number}
         )
 
