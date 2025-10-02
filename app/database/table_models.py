@@ -22,6 +22,16 @@ class Users(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime())
 
 
+class AccessTokens(Base):
+    __tablename__ = "access_tokens"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    access_token: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime())
+
+
+
 async def create_db():
     async with ENGINE.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

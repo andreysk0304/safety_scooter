@@ -4,8 +4,9 @@ from fastapi import APIRouter, Request
 from starlette.responses import JSONResponse
 
 from app.database.database_manager import session_maker
-from app.database.table_models import Users
+from app.database.table_models import Users, AccessTokens
 from app.handlers.components.hash_component import HashComponent
+from app.handlers.components.tokens_component import generate_access_token
 from app.handlers.models.registration_model import Registration
 
 from sqlalchemy import text
@@ -63,17 +64,31 @@ async def registration_func(data: Registration, request: Request):
                 "Vary": "Origin"
             }, status_code=409)
 
+        user = Users(
+            phone_number = data.phone_number,
+            password = await HashComponent.hash_password(password=data.password),
+            created_at = datetime.datetime.now()
+        )
+
         session.add(
-            Users(
-                phone_number = data.phone_number,
-                password = await HashComponent.hash_password(password=data.password),
+            user
+        )
+
+        await session.commit()
+
+        access_token = await generate_access_token()
+
+        session.add(
+            AccessTokens(
+                user_id = user.id,
+                access_token = access_token,
                 created_at = datetime.datetime.now()
             )
         )
 
         await session.commit()
 
-        return  JSONResponse(content={'datail': 'Аккаунт успешно создан'}, headers={
+        return  JSONResponse(content={'datail': 'Аккаунт успешно создан', 'access_token': access_token}, headers={
             "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
             "Access-Control-Allow-Credentials": "true",
             "Vary": "Origin"
