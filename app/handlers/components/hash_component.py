@@ -16,7 +16,7 @@ class hash_component:
         '''
 
 
-        password_hash: str = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+        password_hash: str = str(bcrypt.hashpw(password.encode(), bcrypt.gensalt()))
 
         return password_hash
 
