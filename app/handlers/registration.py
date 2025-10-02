@@ -66,7 +66,7 @@ async def registration_func(data: Registration, request: Request):
         session.add(
             Users(
                 phone_number = data.phone_number,
-                password = HashComponent.hash_password(password=data.password),
+                password = await HashComponent.hash_password(password=data.password),
                 created_at = datetime.datetime.now()
             )
         )
