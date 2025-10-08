@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from fastapi import APIRouter, Request
 from starlette.responses import JSONResponse
@@ -66,7 +67,9 @@ async def login_func(data: Login, request: Request):
 
                 access_token = access_token.fetchone()
 
-                return JSONResponse(content={'detail': 'Аккаунт успешно создан', 'access_token': access_token[0]}, headers={
+                logging.info(f'{access_token}')
+
+                return JSONResponse(content={'detail': 'Вход произведён успешно', 'access_token': access_token[0]}, headers={
                     "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
                     "Access-Control-Allow-Credentials": "true",
                     "Vary": "Origin"
