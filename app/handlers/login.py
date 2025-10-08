@@ -58,35 +58,32 @@ async def login_func(data: Login, request: Request):
         user = user.fetchone()
 
         if user != None:
-            return JSONResponse(content={'detail': 'Аккаунт с таким номером телефона уже существует.'}, headers={
-                "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
-                "Access-Control-Allow-Credentials": "true",
-                "Vary": "Origin"
-            }, status_code=409)
-
-        if HashComponent.check_password(password=data.password, password_hash=user[1]):
-            access_token = await generate_access_token()
-
-            session.add(
-                AccessTokens(
-                    user_id = user.id,
-                    access_token = access_token,
-                    created_at = datetime.datetime.now()
+            if HashComponent.check_password(password=data.password, password_hash=user[1]):
+                access_token = await session.execute(
+                    text('''SELECT access_token FROM access_tokens WHERE user_id = :user_id'''),
+                    {'user_id': user[0]}
                 )
-            )
 
-            await session.commit()
+                access_token = access_token.fetchone()
 
-            return JSONResponse(content={'detail': 'Аккаунт успешно создан', 'access_token': access_token}, headers={
-                "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
-                "Access-Control-Allow-Credentials": "true",
-                "Vary": "Origin"
-            })
+                return JSONResponse(content={'detail': 'Аккаунт успешно создан', 'access_token': access_token[0]}, headers={
+                    "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
+                    "Access-Control-Allow-Credentials": "true",
+                    "Vary": "Origin"
+                })
+
+            else:
+
+                return JSONResponse(content={'detail': 'Не удалось войти в аккаунт'}, headers={
+                    "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
+                    "Access-Control-Allow-Credentials": "true",
+                    "Vary": "Origin"
+                }, status_code=403)
+
 
         else:
-
-            return JSONResponse(content={'detail': 'Не удалось войти в аккаунт'}, headers={
+            return JSONResponse(content={'detail': 'Не удалось найти аккаут'}, headers={
                 "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
                 "Access-Control-Allow-Credentials": "true",
                 "Vary": "Origin"
-            }, status_code=403)
+            }, status_code=404)
