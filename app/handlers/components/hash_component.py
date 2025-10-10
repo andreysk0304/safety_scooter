@@ -31,7 +31,11 @@ class hash_component:
         :return: Дествителен ли пароль
         '''
 
-        if bcrypt.checkpw(password_hash.encode(), password_hash):
+        password_bytes = password.encode('utf-8')
+
+        hash_bytes = password_hash.encode('utf-8')
+
+        if bcrypt.checkpw(password_bytes, hash_bytes):
             return True
 
         else:
