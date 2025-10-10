@@ -2,11 +2,7 @@ import bcrypt
 
 class hash_component:
 
-    def __init__(self):
-
-        ...
-
-
+    @staticmethod
     async def hash_password(self, password: str) -> str:
         '''
         Функция хэширует пароль пользователя
@@ -21,7 +17,7 @@ class hash_component:
         return password_hash
 
 
-
+    @staticmethod
     async def check_password(self, password: str, password_hash: str) -> bool:
         '''
         Функция сравнивает пароль с хэшем из базы данных
@@ -35,11 +31,7 @@ class hash_component:
 
         hash_bytes = password_hash.encode('utf-8')
 
-        if bcrypt.checkpw(password_bytes, hash_bytes):
-            return True
-
-        else:
-            return False
+        return bcrypt.checkpw(password_bytes, hash_bytes)
 
 
 HashComponent = hash_component()
