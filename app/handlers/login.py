@@ -61,7 +61,7 @@ async def login_func(data: Login, request: Request):
         if user != None:
             clean_hash: str = user[1][2:-1]
 
-            if HashComponent.check_password(password=data.password, password_hash=clean_hash):
+            if await HashComponent.check_password(password=data.password, password_hash=clean_hash):
                 access_token = await session.execute(
                     text('''SELECT access_token FROM access_tokens WHERE user_id = :user_id'''),
                     {'user_id': user[0]}
