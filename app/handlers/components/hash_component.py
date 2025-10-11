@@ -2,7 +2,6 @@ import bcrypt
 
 class hash_component:
 
-    @staticmethod
     async def hash_password(self, password: str) -> str:
         '''
         Функция хэширует пароль пользователя
@@ -17,7 +16,6 @@ class hash_component:
         return password_hash
 
 
-    @staticmethod
     async def check_password(self, password: str, password_hash: str) -> bool:
         '''
         Функция сравнивает пароль с хэшем из базы данных
