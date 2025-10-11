@@ -88,7 +88,7 @@ async def registration_func(data: Registration, request: Request):
 
         await session.commit()
 
-        return  JSONResponse(content={'datail': 'Аккаунт успешно создан', 'access_token': access_token}, headers={
+        return  JSONResponse(content={'detail': 'Аккаунт успешно создан', 'access_token': access_token}, headers={
             "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
             "Access-Control-Allow-Credentials": "true",
             "Vary": "Origin"
