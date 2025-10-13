@@ -6,7 +6,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.database.table_models import create_db
 from app.utils.tags import openapi_tags
 
-from app.handlers import registration, login
+from app.handlers import registration, login, upload_video
 
 
 app = FastAPI(openapi_tags=openapi_tags)
@@ -14,6 +14,7 @@ app = FastAPI(openapi_tags=openapi_tags)
 
 app.include_router(registration.router, prefix="")
 app.include_router(login.router, prefix="")
+app.include_router(upload_video.router, prefix="/video")
 
 
 

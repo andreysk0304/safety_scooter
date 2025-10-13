@@ -1,13 +1,10 @@
-import datetime
-import logging
+from fastapi import APIRouter, Request, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi import APIRouter, Request
-from starlette.responses import JSONResponse
+from app.database.database_manager import session_maker, get_db_session
 
-from app.database.database_manager import session_maker
-from app.database.table_models import Users, AccessTokens
 from app.handlers.components.hash_component import HashComponent
-from app.handlers.components.tokens_component import generate_access_token
+from app.handlers.components.responses_component import ResponsesComponent
 from app.handlers.models.login import Login
 
 from sqlalchemy import text
@@ -16,76 +13,29 @@ from sqlalchemy import text
 router = APIRouter(tags=["Authorization"])
 
 
-async def check_validation(data: Login) -> dict | None:
-    phone_number = data.phone_number
-    password = data.password
-
-    msg = ''
-
-    if password == '':
-        msg += 'password is empty. '
-
-    if phone_number == '':
-        msg += 'phone_number is empty. '
-
-    if msg != '':
-        return {'detail': msg}
-
-    else:
-        return None
-
-
-
 @router.post("/login")
-async def login_func(data: Login, request: Request):
+async def login_func(data: Login, request: Request, session: AsyncSession = Depends(get_db_session)):
 
-    async with session_maker() as session:
+    user = await session.execute(
+        text('''SELECT id, password FROM users WHERE phone_number = :phone'''),
+        {'phone': data.phone_number}
+    )
 
-        validator = await check_validation(data)
+    user = user.fetchone()
 
-        if validator != None:
-            return JSONResponse(content=validator, headers={
-                "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
-                "Access-Control-Allow-Credentials": "true",
-                "Vary": "Origin"
-            }, status_code=400)
+    if user == None:
+        return ResponsesComponent.response(request=request, status_code=400, json={'detail': 'Профиль с таким номером телефона не существует.'})
 
+    clean_hash: str = user[1]
 
-        user = await session.execute(
-            text('''SELECT id, password FROM users WHERE phone_number = :phone'''),
-            {'phone': data.phone_number}
-        )
+    if not await HashComponent.check_password(password=data.password, password_hash=clean_hash):
+       return ResponsesComponent.response_403(request=request)
 
-        user = user.fetchone()
+    access_token = await session.execute(
+        text('''SELECT access_token FROM access_tokens WHERE user_id = :user_id'''),
+        {'user_id': user[0]}
+    )
 
-        if user != None:
-            clean_hash: str = user[1][2:-1]
+    access_token = access_token.fetchone()
 
-            if await HashComponent.check_password(password=data.password, password_hash=clean_hash):
-                access_token = await session.execute(
-                    text('''SELECT access_token FROM access_tokens WHERE user_id = :user_id'''),
-                    {'user_id': user[0]}
-                )
-
-                access_token = access_token.fetchone()
-
-                return JSONResponse(content={'detail': 'Вход произведён успешно', 'access_token': access_token[0]}, headers={
-                    "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
-                    "Access-Control-Allow-Credentials": "true",
-                    "Vary": "Origin"
-                })
-
-            else:
-                return JSONResponse(content={'detail': 'Не удалось войти в аккаунт'}, headers={
-                    "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
-                    "Access-Control-Allow-Credentials": "true",
-                    "Vary": "Origin"
-                }, status_code=403)
-
-
-        else:
-            return JSONResponse(content={'detail': 'Не удалось найти аккаут'}, headers={
-                "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
-                "Access-Control-Allow-Credentials": "true",
-                "Vary": "Origin"
-            }, status_code=404)
+    return ResponsesComponent.response(request=request, json={'detail': 'Вход произведён успешно', 'access_token': access_token[0]})
