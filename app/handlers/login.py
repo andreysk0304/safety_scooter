@@ -26,7 +26,7 @@ async def login_func(data: Login, request: Request, session: AsyncSession = Depe
     if user == None:
         return ResponsesComponent.response(request=request, status_code=400, json={'detail': 'Профиль с таким номером телефона не существует.'})
 
-    clean_hash: str = user[1]
+    clean_hash: str = user[1][2:-1]
 
     if not await HashComponent.check_password(password=data.password, password_hash=clean_hash):
        return ResponsesComponent.response_403(request=request)
