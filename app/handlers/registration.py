@@ -41,7 +41,7 @@ async def registration_func(data: Registration, request: Request, session: Async
     )
 
     await session.commit()
-    await session.refresh()
+    await session.refresh(new_user)
 
     access_token = await generate_access_token()
 
