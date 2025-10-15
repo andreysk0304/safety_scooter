@@ -28,6 +28,8 @@ async def login_func(data: Login, request: Request, session: AsyncSession = Depe
 
     clean_hash: str = user[1][2:-1]
 
+    print(clean_hash)
+
     if not await HashComponent.check_password(password=data.password, password_hash=clean_hash):
        return ResponsesComponent.response_403(request=request)
 
@@ -38,4 +40,4 @@ async def login_func(data: Login, request: Request, session: AsyncSession = Depe
 
     access_token = access_token.fetchone()
 
-    return ResponsesComponent.response(request=request, json={'detail': 'Вход произведён успешно', 'access_token': access_token[0]})
+    return ResponsesComponent.response(request=request, json={'detail': 'Вход произведён успешно!', 'access_token': access_token[0]})
