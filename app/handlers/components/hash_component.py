@@ -4,7 +4,7 @@ import bcrypt
 class HashComponent:
 
     @staticmethod
-    async def hash_password(self, password: str) -> str:
+    async def hash_password(password: str) -> str:
         '''
         Функция хэширует пароль пользователя
 
@@ -19,7 +19,7 @@ class HashComponent:
 
 
     @staticmethod
-    async def check_password(self, password: str, password_hash: str) -> bool:
+    async def check_password(password: str, password_hash: str) -> bool:
         '''
         Функция сравнивает пароль с хэшем из базы данных
 
