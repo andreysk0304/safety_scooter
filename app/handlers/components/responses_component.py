@@ -1,4 +1,4 @@
-from fastapi import Request
+from fastapi import Request, status, HTTPException
 from starlette.responses import JSONResponse
 
 
@@ -36,3 +36,19 @@ class ResponsesComponent:
             "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
             "Access-Control-Allow-Credentials": "true", "Vary": "Origin"
         }, status_code=409)
+
+
+    @staticmethod
+    def response_503(request: Request) -> JSONResponse:
+        return JSONResponse(content={'detail': 'Не удалось загрузить видео в S3.'}, headers={
+            "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
+            "Access-Control-Allow-Credentials": "true", "Vary": "Origin"
+        }, status_code=503)
+
+
+    @staticmethod
+    def response_401_error() -> HTTPException:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Не верный токен авторизации."
+        )

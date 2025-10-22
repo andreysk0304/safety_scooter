@@ -4,13 +4,21 @@ from app.database.database_manager import session_maker
 
 from sqlalchemy import text
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
+
+from app.handlers.components.responses_component import ResponsesComponent
 
 
 class AuthorizationComponent:
 
     @staticmethod
-    async def get_user_id() -> dict | None:
+    async def get_user_id(request: Request) -> dict | None:
+
+        access_token = request.headers.get("Authorization", "")
+
+        if access_token == "":
+            ResponsesComponent.response_401_error()
+
         async with session_maker() as session:
 
             user_with_token = await session.execute(
@@ -20,16 +28,10 @@ class AuthorizationComponent:
 
             user_with_token = user_with_token.fetchone()
 
-            if user_with_token == None:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Не верный токен авторизации."
-                )
+            if user_with_token is None:
+                ResponsesComponent.response_401_error()
 
             if user_with_token[1] - datetime.datetime.now() > datetime.timedelta(days=7):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Не верный токен авторизации."
-                )
+                ResponsesComponent.response_401_error()
 
             return {'user_id': user_with_token[0]}

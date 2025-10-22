@@ -37,9 +37,12 @@ class Applications(Base):
     user_id: Mapped[int]
     key: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(String(32))
+    gps_longitude: Mapped[str] = mapped_column(String(32))
+    gps_width: Mapped[str] = mapped_column(String(32))
+    record_time: Mapped[datetime] = mapped_column(DateTime())
     is_delete: Mapped[bool]
     created_at: Mapped[datetime] = mapped_column(DateTime())
-    last_changed: Mapped[datetime] = mapped_column(DateTime())
+    last_change: Mapped[datetime] = mapped_column(DateTime())
 
 
 class Verdicts(Base):
@@ -49,6 +52,7 @@ class Verdicts(Base):
     application_id: Mapped[int] = mapped_column(ForeignKey("applications.id", ondelete="CASCADE"))
     type: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime())
+
 
 async def create_db():
     async with ENGINE.begin() as conn:

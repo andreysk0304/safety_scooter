@@ -3,7 +3,7 @@ import datetime
 from fastapi import APIRouter, Request, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.database_manager import session_maker, get_db_session
+from app.database.database_manager import get_db_session
 from app.database.table_models import Users, AccessTokens
 
 from app.handlers.components.hash_component import HashComponent
@@ -27,7 +27,7 @@ async def registration_func(data: Registration, request: Request, session: Async
 
     user = user.fetchone()
 
-    if user != None:
+    if user is not None:
         return ResponsesComponent.response_409(request=request)
 
     new_user = Users(
