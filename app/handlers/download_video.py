@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from fastapi import APIRouter, UploadFile, File, Request, Depends, Form
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.database.database_manager import get_db_session
 from app.database.table_models import Applications
@@ -10,6 +11,7 @@ from app.handlers.components.responses_component import ResponsesComponent
 from app.utils.s3_client import S3Client
 
 router = APIRouter(tags=["Video"])
+
 
 @router.get("/download/{application_id}")
 async def download_video_func(
@@ -20,22 +22,25 @@ async def download_video_func(
 ):
     user_id = user.get("user_id", "")
 
-    if user_id == "":
+    if not user_id:
         return ResponsesComponent.response_401(request=request)
 
-    application = await session.get(Applications, application_id)
+    stmt = select(Applications).where(
+        Applications.id == application_id,
+        Applications.user_id == user_id
+    )
+    result = await session.execute(stmt)
 
-    if not application or application.user_id != user_id:
+    application = result.scalar_one_or_none()
+
+    if not application:
         return ResponsesComponent.response(
             request=request,
             status_code=404,
             json={"detail": "Видео не найдено или нет доступа"}
         )
 
-    key = application.key
-
-    url = S3Client.generate_presigned_url(key=key, expires_in=600)
-
+    url = S3Client.generate_presigned_url(key=application.key, expires_in=600)
     if not url:
         return ResponsesComponent.response_503(request=request)
 
