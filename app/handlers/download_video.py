@@ -14,12 +14,7 @@ router = APIRouter(tags=["Video"])
 
 
 @router.get("/download/{application_id}")
-async def download_video_func(
-    request: Request,
-    application_id: int,
-    session: AsyncSession = Depends(get_db_session),
-    user: dict = Depends(AuthorizationComponent.get_user_id)
-):
+async def download_video_func(request: Request, application_id: int, session: AsyncSession = Depends(get_db_session), user: dict = Depends(AuthorizationComponent.get_user_id)):
     user_id = user.get("user_id", "")
 
     if not user_id:
