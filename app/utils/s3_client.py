@@ -3,6 +3,8 @@ from uuid import uuid4
 
 import boto3
 
+from botocore.exceptions import ClientError
+
 from botocore.client import Config
 from fastapi import UploadFile
 
@@ -38,3 +40,15 @@ class S3Client:
             logging.error(f'S3_upload_video: {error}')
 
             return "null"
+
+    @staticmethod
+    def generate_presigned_url(key: str, expires_in: int = 600) -> str:
+        try:
+            url = s3.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': S3_BUCKET, 'Key': key},
+                ExpiresIn=expires_in
+            )
+            return url
+        except ClientError:
+            return 'null'
