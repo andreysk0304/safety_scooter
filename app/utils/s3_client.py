@@ -1,4 +1,5 @@
 import logging
+import os
 from uuid import uuid4
 
 import boto3
@@ -25,7 +26,13 @@ class S3Client:
     @staticmethod
     def upload_video(file: UploadFile) -> str:
         try:
-            key = f"safetyscooter_videos/{uuid4()}_{file.filename}"
+            clean_filename = os.path.basename(file.filename)
+
+            clean_filename = clean_filename.replace(" ", "_")
+
+            key = f"safetyscooter_videos/{uuid4()}_{clean_filename}"
+
+            file.file.seek(0)
 
             s3.upload_fileobj(
                 file.file,
@@ -38,8 +45,8 @@ class S3Client:
 
         except Exception as error:
             logging.error(f'S3_upload_video: {error}')
-
             return "null"
+
 
     @staticmethod
     def generate_presigned_url(key: str, expires_in: int = 600) -> str:
