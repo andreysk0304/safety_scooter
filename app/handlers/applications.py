@@ -5,7 +5,6 @@ from app.database.database_manager import get_db_session
 from app.database.table_models import Applications
 from app.handlers.components.authorization_component import AuthorizationComponent
 from app.handlers.components.responses_component import ResponsesComponent
-from app.utils.gps import get_address_from_gps
 
 router = APIRouter()
 
@@ -27,7 +26,7 @@ async def get_user_applications(request: Request, session: AsyncSession = Depend
             "id": app.id,
             "status": STATUSES.get(app.status, "что то не тоо ю_ю"),
             "key": app.key,
-            "address": get_address_from_gps(float(app.gps_longitude), float(app.gps_width)),
+            "address": 'устаревшее поле',
             "record_time": app.record_time.isoformat() if app.record_time else None,
             "last_change": app.last_change.isoformat() if app.last_change else None,
         }
