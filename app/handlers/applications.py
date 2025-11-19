@@ -8,7 +8,8 @@ from app.handlers.components.responses_component import ResponsesComponent
 
 router = APIRouter()
 
-STATUSES = {"pending": "Отправлена", "canceled": "Отклонена", 'processing': 'Проверяется', 'completed': 'Нарушение обнаружено', 'no_violations': 'Нарушение не обнаружено', 'failed': 'Ошибка при обработке'}
+STATUSES = {"pending": "Проверяется", "canceled": "Отклонена", 'processing': 'Проверяется', 'completed': 'Нарушение обнаружено', 'no_violations': 'Нарушение не обнаружено', 'failed': 'Нуждается в ручной проверке'}
+VERDICTS = {"multiple_people_on_scooter": "Езда на самокате вдвоём", "riding_on_zebra_crossing": "Езда по пешеходному переходу"}
 
 @router.get("/applications")
 async def get_user_applications(request: Request, session: AsyncSession = Depends(get_db_session), user: dict = Depends(AuthorizationComponent.get_user_id)):
