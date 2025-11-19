@@ -46,7 +46,7 @@ async def get_user_applications(request: Request, session: AsyncSession = Depend
         if verdict:
             apps_dict[app.id]["verdicts"].append({
                 "id": verdict.id,
-                "type": verdict.type,
+                "type": VERDICTS.get(verdict.type, verdict.type),
                 "scooter_type": verdict.scooter_type,
                 "object_id": verdict.object_id,
                 "timestamp": verdict.timestamp,
