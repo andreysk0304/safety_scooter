@@ -41,7 +41,7 @@ async def upload_video_func(request: Request, gps: list[str] = Form(...), time: 
         Applications(
             user_id = user_id,
             key = key,
-            status = 'for consideration',
+            status = 'pending',
             gps_longitude = gps[-1].split(',')[0].replace('"', '').replace('[', ''),
             gps_width = gps[-1].split(',')[1].replace('"', '').replace('[', ''),
             record_time = datetime.datetime.fromtimestamp(time),

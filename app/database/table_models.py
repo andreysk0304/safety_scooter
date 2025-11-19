@@ -26,17 +26,17 @@ class AccessTokens(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    access_token: Mapped[str] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(DateTime())
+    access_token: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(), nullable=False)
 
 
 class Applications(Base):
     __tablename__ = "applications"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[int]
-    key: Mapped[str] = mapped_column(String(255))
-    status: Mapped[str] = mapped_column(String(32))
+    user_id: Mapped[int] = mapped_column(nullable=False)
+    key: Mapped[str] = mapped_column(String(255), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default='pending')
     gps_longitude: Mapped[str] = mapped_column(String(32))
     gps_width: Mapped[str] = mapped_column(String(32))
     record_time: Mapped[datetime] = mapped_column(DateTime())
@@ -50,9 +50,12 @@ class Verdicts(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     application_id: Mapped[int] = mapped_column(ForeignKey("applications.id", ondelete="CASCADE"))
-    type: Mapped[str] = mapped_column(String(255))
+    type: Mapped[str] = mapped_column(String(255))  # Тип нарушения
+    scooter_type: Mapped[str] = mapped_column(String(64), nullable=True)  # Тип самоката (Yandex/Whoosh/Urent)
+    object_id: Mapped[int] = mapped_column(nullable=True)  # ID объекта из YOLO tracking
+    timestamp: Mapped[float] = mapped_column(nullable=True)  # Время в видео (секунды)
+    coordinates: Mapped[str] = mapped_column(String(255), nullable=True)  # Координаты на кадре
     created_at: Mapped[datetime] = mapped_column(DateTime())
-
 
 async def create_db():
     async with ENGINE.begin() as conn:
