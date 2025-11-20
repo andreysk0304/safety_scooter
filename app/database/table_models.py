@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -18,6 +19,7 @@ class Users(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     phone_number: Mapped[str] = mapped_column(String(16))
     password: Mapped[str] = mapped_column(String(255))
+    balance: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"))
     created_at: Mapped[datetime] = mapped_column(DateTime())
 
 
