@@ -15,7 +15,7 @@ VERDICTS = {"multiple_people_on_scooter": "Езда на самокате вдв
 async def get_user_applications(request: Request, session: AsyncSession = Depends(get_db_session), user: dict = Depends(AuthorizationComponent.get_user_id)):
     user_id = user.get("user_id", "")
 
-    if not user_id:
+    if user_id is None:
         return ResponsesComponent.response_401(request=request)
 
     stmt = (
