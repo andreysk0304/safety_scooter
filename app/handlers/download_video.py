@@ -35,7 +35,7 @@ async def download_video_func(request: Request, application_id: int, session: As
             json={"detail": "Видео не найдено или нет доступа"}
         )
 
-    url = S3Client.generate_presigned_url(key=application.key, expires_in=600)
+    url = await S3Client.generate_presigned_url(key=application.key, expires_in=600)
 
     if not url:
         return ResponsesComponent.response_503(request=request)

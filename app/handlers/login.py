@@ -1,41 +1,52 @@
+import logging
+
 from fastapi import APIRouter, Request, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.database_manager import session_maker, get_db_session
+from app.database.database_manager import get_db_session
+from app.database.table_models import Users, AccessTokens
 
 from app.handlers.components.hash_component import HashComponent
 from app.handlers.components.responses_component import ResponsesComponent
 from app.handlers.models.login import Login
 
-from sqlalchemy import text
-
+from sqlalchemy import select
 
 router = APIRouter(tags=["Authorization"])
+
+logger = logging.getLogger(__name__)
 
 
 @router.post("/login")
 async def login_func(data: Login, request: Request, session: AsyncSession = Depends(get_db_session)):
+    try:
+        user = await session.execute(select(Users).where(Users.phone_number == data.phone_number))
+        user = user.scalars().first()
 
-    user = await session.execute(
-        text('''SELECT id, password FROM users WHERE phone_number = :phone'''),
-        {'phone': data.phone_number}
-    )
+        if not user:
+            return ResponsesComponent.response(request=request, status_code=400, json={'detail': 'Профиль с таким номером телефона не существует.'})
 
-    user = user.fetchone()
+        stored_hash: str = user.password
 
-    if user is None:
-        return ResponsesComponent.response(request=request, status_code=400, json={'detail': 'Профиль с таким номером телефона не существует.'})
+        if not stored_hash:
+            return ResponsesComponent.response(request=request, status_code=500, json={'detail': 'Ошибка базы данных'})
 
-    clean_hash: str = user[1][2:-1]
+        if not await HashComponent.check_password(password=data.password, password_hash=stored_hash):
+           return ResponsesComponent.response_403(request=request)
 
-    if not await HashComponent.check_password(password=data.password, password_hash=clean_hash):
-       return ResponsesComponent.response_403(request=request)
+        access_token = await session.execute(select(AccessTokens).where(AccessTokens.user_id == user.id))
+        access_token = access_token.scalars().first()
 
-    access_token = await session.execute(
-        text('''SELECT access_token FROM access_tokens WHERE user_id = :user_id'''),
-        {'user_id': user[0]}
-    )
+        if not access_token:
+            return ResponsesComponent.response(request=request, status_code=500, json={'detail': 'Ошибка получения токена доступа'})
 
-    access_token = access_token.fetchone()
+        return ResponsesComponent.response(request=request, json={'detail': 'Вход произведён успешно!', 'access_token': access_token.access_token})
+    
+    except Exception as e:
+        logger.error(f'Login error: {e}', exc_info=True)
 
-    return ResponsesComponent.response(request=request, json={'detail': 'Вход произведён успешно!', 'access_token': access_token[0]})
+        return ResponsesComponent.response(
+            request=request, 
+            status_code=500, 
+            json={'detail': 'Внутренняя ошибка сервера при входе'}
+        )

@@ -12,8 +12,8 @@ class HashComponent:
         :return: Захэшированный пароль
         '''
 
-
-        password_hash: str = str(bcrypt.hashpw(password.encode(), bcrypt.gensalt()))
+        password_hash_bytes = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+        password_hash: str = password_hash_bytes.decode('utf-8')
 
         return password_hash
 
@@ -24,11 +24,16 @@ class HashComponent:
         Функция сравнивает пароль с хэшем из базы данных
 
         :param password: Пароль пользователя
-        :param password_hash: Хэш пароля из базы данных
-        :return: Дествителен ли пароль
+        :param password_hash: Хэш пароля из базы данных (может быть в формате b'...' или обычной строке)
+        :return: Действителен ли пароль
         '''
 
         password_bytes = password.encode('utf-8')
+        
+        if password_hash.startswith("b'") and password_hash.endswith("'"):
+            password_hash = password_hash[2:-1]
+        elif password_hash.startswith('b"') and password_hash.endswith('"'):
+            password_hash = password_hash[2:-1]
 
         hash_bytes = password_hash.encode('utf-8')
 

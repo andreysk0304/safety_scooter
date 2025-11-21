@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
@@ -15,17 +17,15 @@ app.include_router(applications.router, prefix="")
 app.include_router(upload_video.router, prefix="/video")
 app.include_router(download_video.router, prefix="/video")
 
-
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
-
-
 
 @app.on_event("startup")
 async def on_startup():

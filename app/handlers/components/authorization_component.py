@@ -13,10 +13,15 @@ class AuthorizationComponent:
 
     @staticmethod
     async def get_user_id(request: Request) -> dict | None:
+        auth_header = request.headers.get("Authorization", "")
+        
+        # Проверка формата токена (Bearer <token>)
+        if not auth_header.startswith("Bearer "):
+            ResponsesComponent.response_401_error()
+        
+        access_token = auth_header.replace("Bearer ", "").strip()
 
-        access_token = request.headers.get("Authorization", "")
-
-        if access_token == "":
+        if not access_token:
             ResponsesComponent.response_401_error()
 
         async with session_maker() as session:
@@ -31,7 +36,9 @@ class AuthorizationComponent:
             if user_with_token is None:
                 ResponsesComponent.response_401_error()
 
-            if user_with_token[1] - datetime.datetime.now() > datetime.timedelta(days=7):
+            token_age = datetime.datetime.now() - user_with_token[1]
+            
+            if token_age > datetime.timedelta(days=7):
                 ResponsesComponent.response_401_error()
 
             return {'user_id': user_with_token[0]}

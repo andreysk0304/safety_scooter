@@ -36,7 +36,7 @@ async def get_user_applications(request: Request, session: AsyncSession = Depend
         if app.id not in apps_dict:
             apps_dict[app.id] = {
                 "id": app.id,
-                "status": STATUSES.get(app.status, "что то не тоо ю_ю"),
+                "status": STATUSES.get(app.status, "Неизвестный статус"),
                 "key": app.key,
                 "record_time": app.record_time.isoformat() if app.record_time else None,
                 "last_change": app.last_change.isoformat() if app.last_change else None,

@@ -27,23 +27,46 @@ async def upload_video_func(request: Request, gps: list[str] = Form(...), time: 
     if not file.filename.lower().endswith(".mp4"):
         return ResponsesComponent.response(request=request, status_code=400, json={"detail": "Только MP4 файлы разрешены"})
 
-    size = file.file.seek(0, 2)
+    current_pos = file.file.tell()
+    file.file.seek(0, 2)
+    size = file.file.tell()
+    file.file.seek(current_pos)
 
     if size > MAX_FILE_SIZE:
         return ResponsesComponent.response(request=request, status_code=413, json={"detail": "Файл слишком большой (макс 1 ГБ)"})
 
-    key: str = S3Client.upload_video(file=file)
+    key: str = await S3Client.upload_video(file=file)
 
     if key == 'null':
         return ResponsesComponent.response_503(request=request)
+
+    try:
+        if not gps or len(gps) == 0:
+            return ResponsesComponent.response(request=request, status_code=400, json={"detail": "GPS координаты не предоставлены"})
+        
+        gps_str = gps[-1] if isinstance(gps[-1], str) else str(gps[-1])
+        gps_clean = gps_str.strip().replace('"', '').replace('[', '').replace(']', '')
+        gps_parts = [part.strip() for part in gps_clean.split(',')]
+        
+        if len(gps_parts) < 2:
+            return ResponsesComponent.response(request=request, status_code=400, json={"detail": "Неверный формат GPS координат"})
+        
+        gps_longitude = gps_parts[0]
+        gps_width = gps_parts[1]
+
+        float(gps_longitude)
+        float(gps_width)
+
+    except (ValueError, IndexError, AttributeError) as e:
+        return ResponsesComponent.response(request=request, status_code=400, json={"detail": f"Неверный формат GPS координат: {str(e)}"})
 
     session.add(
         Applications(
             user_id = user_id,
             key = key,
             status = 'pending',
-            gps_longitude = gps[-1].split(',')[0].replace('"', '').replace('[', ''),
-            gps_width = gps[-1].split(',')[1].replace('"', '').replace('[', ''),
+            gps_longitude = gps_longitude,
+            gps_width = gps_width,
             record_time = datetime.datetime.fromtimestamp(time),
             is_delete = False,
             created_at = datetime.datetime.now(),
