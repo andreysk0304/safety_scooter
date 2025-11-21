@@ -33,4 +33,4 @@ class AuthorizationComponent:
             if token_age > datetime.timedelta(days=7):
                 ResponsesComponent.response_401_error()
 
-            return {'user_id': user_with_token[0]}
+            return {'user_id': user_with_token.user_id}
