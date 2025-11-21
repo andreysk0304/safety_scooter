@@ -28,7 +28,7 @@ class AuthorizationComponent:
             if user_with_token is None:
                 ResponsesComponent.response_401_error()
 
-            token_age = datetime.datetime.now() - user_with_token[1]
+            token_age = datetime.datetime.now() - user_with_token.created_at
             
             if token_age > datetime.timedelta(days=7):
                 ResponsesComponent.response_401_error()
